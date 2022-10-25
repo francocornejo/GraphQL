@@ -15,6 +15,9 @@ import cluster from"cluster";
 const cpus = os.cpus();
 const iscluster = process.argv[3] == "cluster";
 import logger from'./config/winston.js'
+import { graphqlHTTP } from "express-graphql"
+import {createProducto, getProducto, getProductos, updateProducto, deleteProducto} from "./controllers/producto.graphql.controller.js"
+import {productoSchema} from "./graphql/schema.js"
 
 import * as url from 'url';
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
@@ -49,6 +52,20 @@ app.use(
 
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(
+  "/graphql",
+  graphqlHTTP({
+    schema: productoSchema,
+    rootValue: {
+      getProductos: getProductos,
+      getProducto: getProducto,
+      createProducto: createProducto,
+      updateProducto: updateProducto,
+      deleteProducto: deleteProducto,
+    },
+    graphiql: true,
+  })
+);
   
 function hashPassword(password) {
   return bcrypt.hashSync(password, bcrypt.genSaltSync(10));
